@@ -120,6 +120,7 @@ on the first try.
 
 - 🖼️ **[bulk-mockups](https://github.com/mohamed-amine-ben-mallessa/bulk-mockups)** — 1 PSD → N mockups (smart objects + CSV).
 - 📱 **[social-post-factory](https://github.com/mohamed-amine-ben-mallessa/social-post-factory)** — branded social posts in one command.
+- 🔄 **[batch-image-converter](https://github.com/mohamed-amine-ben-mallessa/batch-image-converter)** — convert/resize a whole folder, locally, no upload.
 
 ## Credits
 
