@@ -1,0 +1,14 @@
+{
+  "name": "photopea-as-code",
+  "version": "0.1.0",
+  "description": "Design images programmatically with Photopea (free browser Photoshop) via MCP. Banners, social posts, mockups, batch edits — no Photoshop, no API key. Includes the full condensed Photopea scripting reference.",
+  "author": "photopea-as-code contributors",
+  "license": "MIT",
+  "keywords": ["photopea", "design", "image", "mcp", "photoshop", "banner", "social", "mockup", "agent-skill"],
+  "mcpServers": {
+    "photopea": {
+      "command": "npx",
+      "args": ["-y", "photopea-mcp-server"]
+    }
+  }
+}
