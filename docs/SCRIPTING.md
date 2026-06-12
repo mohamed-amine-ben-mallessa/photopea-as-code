@@ -134,4 +134,52 @@ to the icon URL for theme adaptation.
 photopea.com/templates/ = a gallery of ready-made PSD templates ("Hot / New / Top"),
 publishable by users (`/tuts/publish-your-psd-templates-in-photopea`). Open one, swap its
 smart object / text, export. Good starting point for mockups, social posts, print.
+
+---
+
+## Recipes verified in practice
+
+### Use a CUSTOM FONT (the part the docs gloss over)
+Photopea (web) does **not** read your OS-installed fonts. To use a custom OTF/TTF/WOFF2
+in code, load it with `photopea_load_font` — and the URL trick that actually works is a
+**`data:` URI**, not a local `file:///` path (the browser sandbox blocks `file://`).
+
+```python
+import base64
+with open("MyFont.otf", "rb") as f:
+    font_uri = "data:font/otf;base64," + base64.b64encode(f.read()).decode()
+pp.call("photopea_load_font", {"url": font_uri})
+# then find the exact name Photopea registered it under:
+names = pp.call("photopea_list_fonts", {})        # JSON list of PostScript names
+# now pass it to text:
+pp.call("photopea_add_text", {"content": "TITLE", "x": 90, "y": 400,
+                              "size": 134, "color": "#191210", "font": "MyFont-Regular"})
+```
+- ✅ `data:` URI works. ❌ `file:///C:/...` times out (sandbox).
+- A `.otf` ~50 KB encodes fine inline. The font is available to `add_text`/`edit_text`
+  for the rest of the session.
+
+### Make ink "soak into" a paper/texture background (multiply)
+Open a texture as the background, add your text, then set the **text layer's blend mode
+to MULTIPLY** so the ink follows the paper's wrinkles/grain — an authentic printed look.
+
+```python
+pp.call("photopea_open_file", {"source": "/abs/kraft.png"})       # texture as bg
+pp.call("photopea_add_text", {"content": "PHOTOPEA", "x": 90, "y": 400,
+                              "size": 134, "color": "#191210", "font": "MyFont-Regular"})
+pp.run_script('app.activeDocument.activeLayer.blendMode = BlendMode.MULTIPLY; app.echoToOE("ok");')
+```
+- `run_script` targets `app.activeDocument.activeLayer` — i.e. the layer you JUST added,
+  so call it right after each `add_text`.
+- ⚠️ **Multiply darkens.** Use **dark ink colors** (near-black, deep red, forest green).
+  Light colors (cream, pale ocre, white) become **invisible** under multiply on a dark
+  texture — keep those at `NORMAL` blend (skip the multiply for light text), or don't use
+  light colors on dark paper at all.
+- Other useful `BlendMode` values: `SCREEN` (lightens — for light ink on dark), `OVERLAY`,
+  `LINEARBURN` (stronger ink), `NORMAL` (reset).
+
+### Make many color variants of one layout
+Loop over a palette list; per variant: open the texture, add text in the variant's colors
+(+ multiply), export, then `app.activeDocument.close()` to reset for the next one. Same
+idea powers `social-post-factory`'s themeable posts.
 ```

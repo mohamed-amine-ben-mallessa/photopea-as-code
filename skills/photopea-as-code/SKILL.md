@@ -46,8 +46,19 @@ Photoshop-compatible JS model. Examples:
 - Edit a smart object (mockups): `executeAction(stringIDToTypeID("placedLayerEditContents"))`.
 - Read info: `app.echoToOE(JSON.stringify({w:app.activeDocument.width}))`.
 
+## Custom fonts & texture effects (verified)
+- **Custom font:** Photopea (web) ignores OS fonts. Load a local OTF/TTF with
+  `photopea_load_font({url})` using a **`data:` URI** (base64) — `file:///` is blocked by
+  the browser sandbox. Then `photopea_list_fonts` to get the exact name, and pass it as
+  `font` to `add_text`.
+- **Ink on paper/texture:** open a texture as the bg, add text, then
+  `run_script('app.activeDocument.activeLayer.blendMode = BlendMode.MULTIPLY; app.echoToOE("ok");')`
+  so the ink soaks into the wrinkles. ⚠️ Multiply DARKENS — use **dark colors**; light
+  colors (cream/white) vanish. See `scripts/kraft_poster.py`.
+
 ## Reference
-- `docs/SCRIPTING.md` — full JS API, smart-object mockups, export formats, Live Messaging.
+- `docs/SCRIPTING.md` — full JS API, smart-object mockups, custom fonts, multiply on
+  texture, export formats, Live Messaging.
 - `docs/LEARN-REFERENCE.md` — all 45 Photopea features (menu path + script) condensed.
 
 ## Design tips

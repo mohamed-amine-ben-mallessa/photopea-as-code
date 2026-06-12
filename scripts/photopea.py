@@ -23,6 +23,7 @@ Stdlib only. Node + `npx` must be on PATH.
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import threading
 import time
@@ -161,3 +162,30 @@ def export(pp: Photopea, path: str, fmt: str = "png", quality: Optional[int] = N
     if quality is not None and fmt == "jpg":
         args["quality"] = quality
     pp.call("photopea_export_image", args)
+
+
+def load_font_file(pp: Photopea, path: str) -> None:
+    """Load a local OTF/TTF/WOFF2 into Photopea via a data: URI (file:// is sandbox-blocked)."""
+    import base64
+    ext = os.path.splitext(path)[1].lstrip(".").lower() or "otf"
+    mime = {"otf": "font/otf", "ttf": "font/ttf", "woff2": "font/woff2"}.get(ext, "font/otf")
+    with open(path, "rb") as f:
+        uri = f"data:{mime};base64," + base64.b64encode(f.read()).decode()
+    pp.call("photopea_load_font", {"url": uri})
+
+
+def multiply_active_layer(pp: Photopea) -> None:
+    """Set the just-added layer's blend mode to MULTIPLY (ink soaks into a texture bg)."""
+    pp.run_script('app.activeDocument.activeLayer.blendMode = BlendMode.MULTIPLY; app.echoToOE("ok");')
+
+
+def text_on_texture(pp: Photopea, content: str, x: int, y: int, size: int, color: str,
+                    *, font: str = "", bold: bool = True, multiply: bool = True, **extra) -> None:
+    """Add text and (by default) multiply it onto the background. Use DARK colors with
+    multiply — light colors vanish. Skip multiply for light ink on dark paper."""
+    args = {"content": content, "x": x, "y": y, "size": size, "color": color, "bold": bold, **extra}
+    if font:
+        args["font"] = font
+    pp.call("photopea_add_text", args)
+    if multiply:
+        multiply_active_layer(pp)

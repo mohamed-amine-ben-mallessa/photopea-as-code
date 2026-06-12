@@ -76,6 +76,7 @@ pp.run_script('app.activeDocument.rotateCanvas(90); app.echoToOE("ok");')
 scripts/photopea.py          zero-dep driver for the Photopea MCP (spawn, call, run_script)
 scripts/make_banner.py       1200×630 banner / OG image recipe
 scripts/make_square_post.py  1080×1080 Instagram post recipe
+scripts/kraft_poster.py      custom font + texture (ink-on-paper via MULTIPLY) poster
 skills/photopea-as-code/     a portable agent SKILL.md (Claude Code / Cursor / any MCP agent)
 docs/SCRIPTING.md            the full Photopea JS API: objects, layers, selections, smart-object
                              mockups, export formats, the Live Messaging loop, plugins
@@ -108,12 +109,28 @@ It knows the exact tool names and the gotchas verified here (use `content` not `
 `outputPath` not `path`, shape bounds are `{x,y,width,height}`), so your agent gets it right
 on the first try.
 
+## Custom fonts & texture effects
+
+Photopea (web) **ignores your OS fonts**. Load a local font in code via a `data:` URI
+(a `file:///` path is blocked by the browser sandbox), then print it onto a paper
+texture with the layer blend mode set to **multiply** so the ink soaks into the grain:
+
+```bash
+python scripts/kraft_poster.py kraft.png MyFont.otf "PHOTOPEA" "AS CODE" poster.png
+```
+
+⚠️ Multiply **darkens** — use dark ink colors; light colors (cream/white) vanish on a
+dark texture. Full write-up in [`docs/SCRIPTING.md`](docs/SCRIPTING.md) → "Recipes
+verified in practice".
+
 ## Gotchas we already hit (so you won't)
 
 - `photopea_add_text` → **`content`** (not `text`).
 - `photopea_export_image` → **`outputPath`** + `format` (png/jpg/webp/psd/svg); `quality` 1-100 is JPG-only.
 - `photopea_add_gradient` applies to an **existing layer** → `add_layer` first.
 - `photopea_add_shape` → bounds use **`{x, y, width, height}`** (not left/top).
+- **Custom fonts:** load via a `data:` URI (not `file:///`); get the name from `list_fonts`.
+- **Multiply darkens** — dark ink only; light text needs `NORMAL` (or `SCREEN`).
 - The first tool call **opens a browser** — that's Photopea, leave it open.
 
 ## Related
